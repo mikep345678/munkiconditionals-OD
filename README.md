@@ -1,0 +1,1 @@
+Assign munki application manifests by OD computer group membership
