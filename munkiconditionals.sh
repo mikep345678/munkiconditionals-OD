@@ -3,10 +3,11 @@
 # munkiconditionals.sh
 # this script should reside in /usr/local/munki/conditions where it is called at every run of managedsoftwareupdate
 
-# define where dsgrouputil is installed 
+# define where dsgrouputil is installed. dsgrouputil is available from https://github.com/jatoben/dsgrouputil
 dsgu="/usr/local/bin/dsgrouputil"
 
-# Read the location of the ManagedInstallDir from ManagedInstall.plist
+# Read the location of the ManagedInstallDir from ManagedInstall.plist (if using MCX, read Managed\ Preferences/ManagedInstalls)
+
 #managedinstalldir="$(defaults read /Library/Preferences/ManagedInstalls ManagedInstallDir)"
 managedinstalldir="$(defaults read /Library/Managed\ Preferences/ManagedInstalls ManagedInstallDir)"
 
@@ -14,8 +15,11 @@ managedinstalldir="$(defaults read /Library/Managed\ Preferences/ManagedInstalls
 # Make sure we're outputting our information to "ConditionalItems.plist" (plist is left off since defaults requires this)
 plist_loc="$managedinstalldir/ConditionalItems"
 
+# Gather list of all OD groups, peeling out only those that include the text "munkiapp".
+# My OD policy groups follow a naming scheme like -pol_comp_munkiapp_office and -pol_comp_munkiapp_adobecs5
 appgroups=$( dscl /LDAPv3/od1-sdob.ad.barabooschools.net/ -list /ComputerGroups | grep munkiapp )
 
+# Build list of assigned applications by querying group membership of current computer 
 for app in $appgroups
 do
 	if $dsgu -q 1 -o checkmember -t computer -currentHost 1 -g $app; then
